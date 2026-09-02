@@ -73,3 +73,16 @@
 
 @col-range-back: var(--accent);
 @col-range-thumb: var(--accent-bright);
+
+#root::after {
+  content: "";
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 150px;
+  height: 240px;
+  background: url('@FILE_PREFIX@/public/images/saya.png') no-repeat center/contain;
+  pointer-events: none;
+  opacity: 0.8;
+  z-index: 9999;
+}
