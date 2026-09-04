@@ -54,12 +54,12 @@ const updateButton = () => {
 const openModal = () => {
     if (!$modal) return;
     const showUser = hasUsers();
-    $modal.find('#auth-user').toggle(showUser);
-    if (!showUser) {
+    if (showUser) {
+        $modal.find('#auth-title').text('Sign in');
+        $modal.find('#auth-user').show();
+    } else {
         $modal.find('#auth-title').text('Admin login');
         $modal.find('#auth-user').hide();
-    } else {
-        $modal.find('#auth-title').text('Sign in');
     }
     $modal.rmCls('hidden');
     $modal.find('#auth-hint').text(showUser ? 'Enter your username and password.' : 'Default password is empty. Change it in options.json.');
