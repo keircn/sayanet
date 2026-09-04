@@ -10,6 +10,7 @@ const settings = Object.assign({
 
 let $toolbar;
 let $uploadInput;
+let $folderInput;
 
 const canWrite = () => {
     try {
@@ -20,24 +21,65 @@ const canWrite = () => {
 
 const refresh = () => location.refresh();
 
-const uploadFiles = files => {
+const uploadFiles = (files, paths) => {
     if (!files || !files.length) return;
     const loc = location.getItem();
     if (!loc) return;
     const fd = new FormData();
     fd.append('action', 'upload');
     fd.append('href', loc.absHref);
-    each(files, f => fd.append('files[]', f));
+    each(files, (f, idx) => {
+        fd.append('files[]', f);
+        const p = paths && paths[idx] ? paths[idx] : (f.webkitRelativePath || f.relativePath || '');
+        if (p) fd.append('paths[]', p);
+    });
     // use fetch directly for multipart
     fetch('?', {method: 'POST', body: fd})
         .then(r => r.json())
         .then(res => {
             if (res && res.ok === false) {
-                event.pub('notification', `Upload failed: ${res.txt || 'error'}`);
+                const detail = res.results ? res.results.filter(x => !x.ok).map(x => x.name + ': ' + (x.error || 'failed')).join(', ') : (res.txt || 'error');
+                event.pub('notification', `Upload failed: ${detail}`);
+            } else if (res && res.results) {
+                const extracted = res.results.filter(x => x.extracted).length;
+                if (extracted) event.pub('notification', `Extracted ${extracted} archive(s)`);
             }
             refresh();
         })
         .catch(() => event.pub('notification', 'Upload failed'));
+};
+
+const getFilesFromEntries = async items => {
+    const traverse = (entry, path) => new Promise(resolve => {
+        if (entry.isFile) {
+            entry.file(file => {
+                file.relativePath = path + file.name;
+                resolve([file]);
+            }, () => resolve([]));
+        } else if (entry.isDirectory) {
+            const reader = entry.createReader();
+            reader.readEntries(async entries => {
+                let files = [];
+                for (const e of entries) {
+                    const sub = await traverse(e, path + entry.name + '/');
+                    files = files.concat(sub);
+                }
+                resolve(files);
+            }, () => resolve([]));
+        } else resolve([]);
+    });
+    let files = [];
+    for (let i = 0; i < items.length; i += 1) {
+        const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+        if (entry) {
+            const sub = await traverse(entry, '');
+            files = files.concat(sub);
+        } else if (items[i].getAsFile) {
+            const f = items[i].getAsFile();
+            if (f) files.push(f);
+        }
+    }
+    return files;
 };
 
 const onUploadClick = () => {
@@ -45,9 +87,22 @@ const onUploadClick = () => {
     $uploadInput[0].click();
 };
 
+const onUploadFolderClick = () => {
+    if (!canWrite()) return;
+    $folderInput[0].click();
+};
+
 const onUploadChange = ev => {
     const files = ev.target.files;
-    uploadFiles(files);
+    const paths = Array.from(files).map(f => f.webkitRelativePath || '');
+    uploadFiles(files, paths);
+    ev.target.value = '';
+};
+
+const onFolderChange = ev => {
+    const files = ev.target.files;
+    const paths = Array.from(files).map(f => f.webkitRelativePath || '');
+    uploadFiles(files, paths);
     ev.target.value = '';
 };
 
@@ -106,9 +161,11 @@ const init = () => {
     $toolbar = dom('#toolbar');
     if (!$toolbar.length) return;
 
-    // create hidden file input
+    // create hidden file inputs
     $uploadInput = dom('<input type="file" multiple style="display:none"/>').appTo('body');
     $uploadInput.on('change', onUploadChange);
+    $folderInput = dom('<input type="file" multiple webkitdirectory style="display:none"/>').appTo('body');
+    $folderInput.on('change', onFolderChange);
 
     // toolbar buttons
     const addBtn = (id, label, handler) => {
@@ -119,7 +176,8 @@ const init = () => {
 
     // only show if canWrite
     if (canWrite()) {
-        addBtn('upload', 'Upload', onUploadClick);
+        addBtn('upload', 'Upload files', onUploadClick);
+        addBtn('upload-folder', 'Upload folder', onUploadFolderClick);
         addBtn('mkdir', 'New folder', onMkdir);
         addBtn('delete', 'Delete', onDelete);
         addBtn('rename', 'Rename', onRename);
@@ -133,11 +191,24 @@ const init = () => {
                 $content.addCls('dragover');
             });
             $content.on('dragleave', () => $content.rmCls('dragover'));
-            $content.on('drop', ev => {
+            $content.on('drop', async ev => {
                 ev.preventDefault();
                 $content.rmCls('dragover');
                 const dt = ev.dataTransfer;
-                if (dt && dt.files) uploadFiles(dt.files);
+                if (!dt) return;
+                if (dt.items && dt.items.length && dt.items[0].webkitGetAsEntry) {
+                    const files = await getFilesFromEntries(dt.items);
+                    if (files.length) {
+                        const paths = files.map(f => f.relativePath || '');
+                        uploadFiles(files, paths);
+                        return;
+                    }
+                }
+                if (dt.files) {
+                    const files = Array.from(dt.files);
+                    const paths = files.map(f => f.webkitRelativePath || '');
+                    uploadFiles(files, paths);
+                }
             });
         }
     }
@@ -145,9 +216,9 @@ const init = () => {
     event.sub('location.changed', () => {
         // re-evaluate canWrite after navigation (role may change)
         if (!canWrite()) {
-            dom('#upload,#mkdir,#delete,#rename,#move').hide();
+            dom('#upload,#upload-folder,#mkdir,#delete,#rename,#move').hide();
         } else {
-            dom('#upload,#mkdir,#delete,#rename,#move').show();
+            dom('#upload,#upload-folder,#mkdir,#delete,#rename,#move').show();
         }
     });
 };

@@ -183,8 +183,20 @@ class Api {
         if (empty($files)) {
             Util::json_fail(Util::ERR_FAILED, 'no files', true);
         }
+        $paths = [];
+        $rawPaths = $this->request->query('paths', []);
+        if (is_array($rawPaths)) {
+            $paths = $rawPaths;
+        } elseif (is_string($rawPaths) && $rawPaths !== '') {
+            $paths = [$rawPaths];
+        }
+        // also support single path param
+        $singlePath = $this->request->query('path', null);
+        if ($singlePath !== null && empty($paths)) {
+            $paths = is_array($singlePath) ? $singlePath : [$singlePath];
+        }
         $ops = new FileOps($this->context);
-        $res = $ops->upload($destHref, $files);
+        $res = $ops->upload($destHref, $files, $paths);
         Util::json_exit($res);
     }
 
