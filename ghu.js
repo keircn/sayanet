@@ -12,6 +12,10 @@ const BUILD = join(ROOT, 'build');
 const mapper = mapfn.p(SRC, BUILD).s('.less', '.css').s('.pug', '');
 const WEBPACK_CFG = {
     mode: 'none',
+    target: 'web',
+    output: {
+        chunkFormat: 'array-push'
+    },
     module: {
         rules: [
             {
@@ -74,7 +78,7 @@ ghu.task('build:scripts', runtime => {
 });
 
 ghu.task('build:styles', runtime => {
-    return read(`${SRC}/_sayanet/public/css/*.less`)
+    return read(`${SRC}/_sayanet/public/css/*.less, !${SRC}/_sayanet/public/css/*.vite.less`)
         .then(includeit())
         .then(less())
         .then(autoprefixer())

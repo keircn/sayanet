@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+    paths:
+        - src/_sayanet/private/php
+    excludePaths:
+        - src/_sayanet/private/php/pages
+    ignoreErrors:
+        # legacy global class autoload without namespaces
+        - '#Class .* not found#'
+        - '#Function .* not found#'

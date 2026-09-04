@@ -3,7 +3,7 @@
 define('SAYANET_VERSION', '{{VERSION}}');
 // legacy alias for backwards compatibility
 define('H5AI_VERSION', SAYANET_VERSION);
-define('MIN_PHP_VERSION', '7.0.0');
+define('MIN_PHP_VERSION', '8.1.0');
 
 if (!function_exists('version_compare') || version_compare(PHP_VERSION, MIN_PHP_VERSION, '<')) {
     header('Content-type: text/plain;charset=utf-8');

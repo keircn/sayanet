@@ -22,13 +22,17 @@ There are installation ready packages for the latest [releases][release] and
 [dev builds][develop]. But to build **sayanet** yourself either `git clone` or
 download the repository. From within the root folder run the following
 commands to find a fresh zipball in folder `build` (tested on linux only,
-requires [`node 10.0+`][node] to be installed, might work on other
-configurations).
+requires [`node 22+`][node] and [`PHP 8.1+`][php] to be installed).
 
 ~~~sh
 > npm install
-> npm run build
+> npm run build          # legacy ghu build
+> npm run build:vite     # modern Vite build (recommended)
+> npm run lint && npm test
 ~~~
+
+Requires `node >=22` (see `.nvmrc` `lts/jod`) and `PHP >=8.1` with `ext-gd` and `ext-json`.
+Docker: `docker compose up --build` (see `docker-compose.yml`).
 
 
 ## License
@@ -69,6 +73,7 @@ Upstream h5ai: https://larsjung.de/h5ai/ - https://github.com/lrsjng/h5ai
 [release]: https://github.com/keircn/sayanet/releases
 [develop]: https://github.com/keircn/sayanet
 [node]: https://nodejs.org
+[php]: https://www.php.net
 [material-design-icons]: https://github.com/google/material-design-icons
 
 [license-img]: https://img.shields.io/badge/license-MIT-a0a060.svg?style=flat-square

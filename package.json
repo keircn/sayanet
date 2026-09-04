@@ -9,24 +9,48 @@
     "type": "git",
     "url": "https://github.com/keircn/sayanet.git"
   },
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "not dead",
+    "> 0.5%",
+    "last 2 versions"
+  ],
   "scripts": {
     "lint": "eslint .",
     "test": "node test",
     "build": "node ghu release",
+    "build:vite": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
     "precommit": "npm run -s lint && npm run -s test"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
     "@babel/preset-env": "^7.23.9",
+    "@eslint/js": "^9.39.5",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "autoprefixer": "^10.5.4",
     "babel-loader": "^9.2.1",
-    "eslint": "^8.57.1",
+    "cssnano": "^9.0.2",
+    "eslint": "^9.39.5",
     "ghu": "^0.28.5",
+    "globals": "^16.0.0",
     "jsdom": "^24.1.0",
     "kjua": "^0.10.0",
+    "less": "^4.9.1",
     "lolight": "^1.4.1",
     "marked": "^14.1.3",
     "normalize.css": "8.0.1",
     "null-loader": "4.0.1",
-    "scar": "^2.3.4"
+    "postcss": "^8.5.28",
+    "pug": "^3.0.4",
+    "scar": "^2.3.4",
+    "vite": "^6.4.3"
   }
 }

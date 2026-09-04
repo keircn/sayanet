@@ -4,3 +4,7 @@
 /local/
 /node_modules/
 /npm-debug.log
+/src/_sayanet/public/js/*__TMP*
+/src/_sayanet/public/js/1.*
+/test/*__TMP*
+/test/1.*

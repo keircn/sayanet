@@ -53,13 +53,44 @@ class Context {
     }
 
     public function login_admin($pass) {
-        $this->session->set(Context::$AS_ADMIN_SESSION_KEY, strcasecmp(hash('sha512', $pass), $this->passhash) === 0);
+        $isValid = false;
+        $hash = (string)$this->passhash;
+        // Support modern password_hash (argon2id/bcrypt) and legacy sha512
+        if (str_starts_with($hash, '$2y$') || str_starts_with($hash, '$argon2')) {
+            $isValid = password_verify((string)$pass, $hash);
+            // timing-safe rehash check
+            if ($isValid && password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+                // could persist new hash, but keep in-memory for now
+            }
+        } else {
+            // legacy sha512 with timing-safe compare
+            $computed = hash('sha512', (string)$pass);
+            $isValid = hash_equals(strtolower($hash), strtolower($computed));
+        }
+        if ($isValid) {
+            // prevent session fixation
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_regenerate_id(true);
+            }
+        }
+        $this->session->set(Context::$AS_ADMIN_SESSION_KEY, $isValid);
         return $this->session->get(Context::$AS_ADMIN_SESSION_KEY);
     }
 
     public function logout_admin() {
         $this->session->set(Context::$AS_ADMIN_SESSION_KEY, false);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
         return $this->session->get(Context::$AS_ADMIN_SESSION_KEY);
+    }
+
+    /**
+     * Helper to generate a secure passhash for options.json
+     * Usage: php -r "echo password_hash('yourpassword', PASSWORD_DEFAULT);"
+     */
+    public static function hash_password($pass) {
+        return password_hash((string)$pass, PASSWORD_DEFAULT);
     }
 
     public function is_admin() {
@@ -290,11 +321,13 @@ class Context {
         $html = '';
 
         foreach ($styles as $href) {
-            $html .= '<link rel="stylesheet" href="' . $this->prefix_x_head_href($href) . '" class="x-head">';
+            $safe = htmlspecialchars($this->prefix_x_head_href($href), ENT_QUOTES, 'UTF-8');
+            $html .= '<link rel="stylesheet" href="' . $safe . '" class="x-head">';
         }
 
         foreach ($scripts as $href) {
-            $html .= '<script src="' . $this->prefix_x_head_href($href) . '" class="x-head"></script>';
+            $safe = htmlspecialchars($this->prefix_x_head_href($href), ENT_QUOTES, 'UTF-8');
+            $html .= '<script src="' . $safe . '" class="x-head"></script>';
         }
 
         $html .= $this->get_fonts_html();

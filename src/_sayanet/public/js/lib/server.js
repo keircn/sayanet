@@ -1,24 +1,26 @@
 const {each, dom} = require('./util');
-const XHR = global.window.XMLHttpRequest;
 
-const request = data => {
-    return new Promise(resolve => {
-        const xhr = new XHR();
-        const on_ready_state_change = () => {
-            if (xhr.readyState === XHR.DONE) {
-                try {
-                    resolve(JSON.parse(xhr.responseText));
-                } catch (err) {
-                    resolve({err, txt: xhr.responseText});
-                }
-            }
-        };
-
-        xhr.open('POST', '?', true);
-        xhr.onreadystatechange = on_ready_state_change;
-        xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
-        xhr.send(JSON.stringify(data));
-    });
+const request = async (data, {signal} = {}) => {
+    try {
+        const res = await fetch('?', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json;charset=utf-8'},
+            body: JSON.stringify(data),
+            signal
+        });
+        const text = await res.text();
+        try {
+            return JSON.parse(text);
+        } catch (err) {
+            return {err, txt: text};
+        }
+    } catch (err) {
+        // network error or abort
+        if (err && err.name === 'AbortError') {
+            return {err, txt: ''};
+        }
+        return {err, txt: String(err)};
+    }
 };
 
 const formRequest = data => {

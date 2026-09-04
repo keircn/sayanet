@@ -39,7 +39,7 @@ class Custom {
             ];
         }
 
-        $root_path = $this->context->get_setup()->get('FILE_PREFIX');
+        $root_path = $this->context->get_setup()->get('ROOT_PATH');
         $path = $this->context->to_path($href);
 
         $header = null;

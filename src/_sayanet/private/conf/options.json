@@ -22,7 +22,7 @@
     "resources": {
         "scripts": [],
         "styles": [
-            "//fonts.googleapis.com/css?family=Ubuntu:300,400,700%7CUbuntu+Mono:400,700"
+            "https://fonts.googleapis.com/css?family=Ubuntu:300,400,700%7CUbuntu+Mono:400,700"
         ]
     },
 

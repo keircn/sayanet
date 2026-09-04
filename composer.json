@@ -1,0 +1,35 @@
+{
+    "name": "keircn/sayanet",
+    "description": "Modern HTTP web server index (Sayanet fork of h5ai)",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "ext-gd": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "squizlabs/php_codesniffer": "^3.9",
+        "phpstan/phpstan": "^1.12"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sayanet\\": "src/_sayanet/private/php/"
+        },
+        "classmap": [
+            "src/_sayanet/private/php/"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit --configuration phpunit.xml",
+        "lint": "phpcs --standard=PSR12 src/_sayanet/private/php",
+        "stan": "phpstan analyse --level=8 src/_sayanet/private/php"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {}
+    },
+    "minimum-stability": "stable"
+}

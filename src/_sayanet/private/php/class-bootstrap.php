@@ -8,7 +8,19 @@ class Bootstrap {
         putenv('LANG=en_US.UTF-8');
         setlocale(LC_CTYPE, 'en_US.UTF-8');
         date_default_timezone_set(@date_default_timezone_get());
-        session_start();
+        $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' && $_SERVER['HTTPS'] !== '';
+        session_start([
+            'cookie_httponly' => true,
+            'cookie_secure' => $secure,
+            'cookie_samesite' => 'Lax',
+            'use_strict_mode' => true,
+            'use_cookies' => true,
+            'use_only_cookies' => true
+        ]);
+        // security headers
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
 
         $session = new Session($_SESSION);
         $request = new Request($_REQUEST, file_get_contents('php://input'));

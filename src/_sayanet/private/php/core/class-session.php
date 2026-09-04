@@ -10,8 +10,8 @@ class Session {
     }
 
     public function set($key, $value) {
-        $key = Session::$KEY_PREFIX . $key;
-        $this->store[$key] = $value;
+        $prefixed = Session::$KEY_PREFIX . $key;
+        $this->store[$prefixed] = $value;
         // also clear legacy key to avoid stale data
         $legacy = Session::$LEGACY_KEY_PREFIX . $key;
         if (array_key_exists($legacy, $this->store)) {

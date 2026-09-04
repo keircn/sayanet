@@ -1,0 +1,10 @@
+node_modules
+build
+.git
+.gitignore
+coverage
+.nyc_output
+local
+npm-debug.log*
+pnpm-debug.log*
+.env

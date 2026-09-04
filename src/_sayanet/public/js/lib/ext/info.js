@@ -1,5 +1,16 @@
-const kjua = require('kjua');
 const {isNum, dom} = require('../util');
+
+let kjuaCache = null;
+const getKjua = async () => {
+    if (kjuaCache) return kjuaCache;
+    try {
+        const mod = await import('kjua');
+        kjuaCache = mod.default || mod;
+    } catch (e) {
+        try { kjuaCache = require('kjua'); } catch (err) { kjuaCache = () => dom('<div/>'); }
+    }
+    return kjuaCache;
+};
 const event = require('../core/event');
 const format = require('../core/format');
 const resource = require('../core/resource');
@@ -56,7 +67,7 @@ const updateSettings = () => {
     }
 };
 
-const update = item => {
+const update = async item => {
     let src = item.thumbRational || item.icon;
     const isThumb = !!item.thumbRational;
 
@@ -96,6 +107,7 @@ const update = item => {
 
     if (settings.qrcode) {
         const loc = global.window.location;
+        const kjua = await getKjua();
         $qrcode.clr().app(kjua({
             render: 'image',
             size: 200,

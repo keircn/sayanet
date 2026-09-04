@@ -22,6 +22,7 @@
     assert('console', win.console && is_fn(win.console.log));
     assert('assign', win.Object && is_fn(win.Object.assign));
     assert('promise', is_fn(win.Promise));
+    assert('fetch', is_fn(win.fetch));
     // assert('xhr', is_fn(win.XMLHttpRequest)); // is object in safari
     assert('xhr', win.XMLHttpRequest);
 }(this));

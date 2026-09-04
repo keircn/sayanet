@@ -32,8 +32,15 @@ class Api {
 
         set_time_limit(0);
         session_write_close();
+        $safeAs = basename(str_replace(['"', '\\', '/', "\r", "\n"], '', (string)$as));
+        if ($safeAs === '') {
+            $safeAs = 'download';
+        }
+        // RFC 5987 for unicode filenames
+        $encoded = rawurlencode($safeAs);
         header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="' . $as . '"');
+        header('Content-Disposition: attachment; filename="' . $safeAs . '"; filename*=UTF-8\'\'' . $encoded);
+        header('X-Content-Type-Options: nosniff');
         header('Connection: close');
         $ok = $archive->output($type, $base_href, $hrefs);
 

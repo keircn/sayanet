@@ -51,7 +51,9 @@ class Archive {
         $cmd = str_replace('[FILES]', count($this->files) ? implode(' ', array_map('escapeshellarg', $this->files)) : '', $cmd);
         try {
             Util::passthru_cmd($cmd);
-        } catch (Exeption $err) {
+        } catch (Exception $err) {
+            return false;
+        } catch (Throwable $err) {
             return false;
         }
         return true;
