@@ -1,6 +1,6 @@
 const config = require('../config');
 
-module.exports = Object.assign({}, config.options, {
-    publicHref: config.setup.PUBLIC_HREF,
-    rootHref: config.setup.ROOT_HREF
+module.exports = Object.assign({}, config.options || {}, {
+    publicHref: config.setup && config.setup.PUBLIC_HREF,
+    rootHref: config.setup && config.setup.ROOT_HREF
 });
