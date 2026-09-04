@@ -102,9 +102,6 @@ const onMove = () => {
 
 const init = () => {
     if (!settings.enabled) return;
-    // check if can_write, but still init toolbar for all, hide if not
-    const loc = location.getItem();
-    if (!loc) return;
 
     $toolbar = dom('#toolbar');
     if (!$toolbar.length) return;
