@@ -64,7 +64,7 @@ ghu.task('clean', 'delete build folder', () => {
 });
 
 ghu.task('build:scripts', runtime => {
-    return read(`${SRC}/_h5ai/public/js/scripts.js`)
+    return read(`${SRC}/_sayanet/public/js/scripts.js`)
         .then(webpack(WEBPACK_CFG))
         .then(wrap('\n\n// @include "pre.js"\n\n'))
         .then(includeit())
@@ -74,7 +74,7 @@ ghu.task('build:scripts', runtime => {
 });
 
 ghu.task('build:styles', runtime => {
-    return read(`${SRC}/_h5ai/public/css/*.less`)
+    return read(`${SRC}/_sayanet/public/css/*.less`)
         .then(includeit())
         .then(less())
         .then(autoprefixer())
@@ -91,7 +91,7 @@ ghu.task('build:pages', runtime => {
 });
 
 ghu.task('build:copy', runtime => {
-    const mapper_root = mapfn.p(ROOT, join(BUILD, '_h5ai'));
+    const mapper_root = mapfn.p(ROOT, join(BUILD, '_sayanet'));
 
     return Promise.all([
         read(`${SRC}/**/conf/*.json`)
@@ -113,8 +113,8 @@ ghu.task('build:copy', runtime => {
 
 ghu.task('build:tests', ['build:styles'], 'build the test suite', () => {
     return Promise.all([
-        read(`${BUILD}/_h5ai/public/css/styles.css`)
-            .then(write(`${BUILD}/test/h5ai-styles.css`, {overwrite: true})),
+        read(`${BUILD}/_sayanet/public/css/styles.css`)
+            .then(write(`${BUILD}/test/sayanet-styles.css`, {overwrite: true})),
 
         read(`${TEST}/index.html`)
             .then(write(`${BUILD}/test/index.html`, {overwrite: true})),
@@ -140,7 +140,7 @@ ghu.task('deploy', ['build'], 'deploy to a specified path with :dest=/some/path'
 
     const mapper_deploy = mapfn.p(BUILD, resolve(runtime.args.dest));
 
-    return read(`${BUILD}/_h5ai/**`)
+    return read(`${BUILD}/_sayanet/**`)
         .then(write(mapper_deploy, {overwrite: true, cluster: true}));
 });
 
@@ -151,7 +151,7 @@ ghu.task('watch', runtime => {
 ghu.task('release', ['force-production', 'clean', 'build'], 'create a zipball', runtime => {
     const target = join(BUILD, `${runtime.pkg.name}-${runtime.pkg.version}.zip`);
 
-    return read(`${BUILD}/_h5ai/**`)
+    return read(`${BUILD}/_sayanet/**`)
         .then(jszip({dir: BUILD, level: 9}))
         .then(write(target, {overwrite: true}));
 });

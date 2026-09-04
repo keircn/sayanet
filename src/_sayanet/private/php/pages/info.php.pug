@@ -1,0 +1,10 @@
+extends ./page.tpl.pug
+
+block init
+    - var title = `sayanet info page - v${pkg.version}`
+    - var module = 'info'
+
+block body
+    div#content
+        h1#header
+            a(href=pkg.homepage) sayanet

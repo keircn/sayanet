@@ -1,8 +1,8 @@
-# h5ai
+# sayanet
 
-[![license][license-img]][github] [![web][web-img]][web] [![github][github-img]][github]
+[![license][license-img]][github]
 
-A modern HTTP web server index for Apache httpd, lighttpd, and nginx.
+A modern HTTP web server index for Apache httpd, lighttpd, and nginx. (Sayanet fork of h5ai)
 
 
 ## Important
@@ -13,11 +13,13 @@ A modern HTTP web server index for Apache httpd, lighttpd, and nginx.
   [project page][web].
 * For bug reports and feature requests please use [issues][github-issues].
 
+> **Legacy note:** Previous versions were installed as `_h5ai`. New installs should use `_sayanet`. Existing production installations using `_h5ai` remain supported via legacy compatibility (config files, header/footer names, localStorage keys and environment variables like `H5AI_ROOT_PATH` still work).
+
 
 ## Build
 
 There are installation ready packages for the latest [releases][release] and
-[dev builds][develop]. But to build **h5ai** yourself either `git clone` or
+[dev builds][develop]. But to build **sayanet** yourself either `git clone` or
 download the repository. From within the root folder run the following
 commands to find a fresh zipball in folder `build` (tested on linux only,
 requires [`node 10.0+`][node] to be installed, might work on other
@@ -56,18 +58,19 @@ THE SOFTWARE.
 
 ## References
 
-**h5ai** profits from other projects, all of them licensed under the MIT license
+**sayanet** (originally h5ai) profits from other projects, all of them licensed under the MIT license
 too. Exceptions are some [Material Design icons][material-design-icons] (CC BY 4.0).
 
+Upstream h5ai: https://larsjung.de/h5ai/ - https://github.com/lrsjng/h5ai
 
-[web]: https://larsjung.de/h5ai/
-[github]: https://github.com/lrsjng/h5ai
-[github-issues]: https://github.com/lrsjng/h5ai/issues
-[release]: https://release.larsjung.de/h5ai/
-[develop]: https://release.larsjung.de/h5ai/develop/
+[web]: https://github.com/keircn/sayanet
+[github]: https://github.com/keircn/sayanet
+[github-issues]: https://github.com/keircn/sayanet/issues
+[release]: https://github.com/keircn/sayanet/releases
+[develop]: https://github.com/keircn/sayanet
 [node]: https://nodejs.org
 [material-design-icons]: https://github.com/google/material-design-icons
 
 [license-img]: https://img.shields.io/badge/license-MIT-a0a060.svg?style=flat-square
-[web-img]: https://img.shields.io/badge/web-larsjung.de/h5ai-a0a060.svg?style=flat-square
-[github-img]: https://img.shields.io/badge/github-lrsjng/h5ai-a0a060.svg?style=flat-square
+[web-img]: https://img.shields.io/badge/web-github.com/keircn/sayanet-a0a060.svg?style=flat-square
+[github-img]: https://img.shields.io/badge/github-keircn/sayanet-a0a060.svg?style=flat-square

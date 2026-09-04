@@ -1,13 +1,13 @@
 {
-  "name": "h5ai",
+  "name": "sayanet",
   "version": "0.30.0",
-  "description": "Modern HTTP web server index.",
-  "homepage": "https://larsjung.de/h5ai/",
+  "description": "Modern HTTP web server index. (Sayanet fork of h5ai)",
+  "homepage": "https://github.com/keircn/sayanet",
   "author": "Lars Jung <lrsjng@gmail.com> (https://larsjung.de)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lrsjng/h5ai.git"
+    "url": "https://github.com/keircn/sayanet.git"
   },
   "scripts": {
     "lint": "eslint .",
