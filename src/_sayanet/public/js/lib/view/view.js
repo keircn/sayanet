@@ -22,22 +22,22 @@ const sortedSizes = settings.sizes.sort((a, b) => a - b);
 const checkedModes = intersection(settings.modes, modes);
 const storekey = 'view';
 const viewTpl =
-        `<div id="view">
-            <ul id="items" class="clearfix">
-                <li class="header">
-                    <a class="icon"></a>
-                    <a class="label" href="#"><span class="l10n-name"/></a>
-                    <a class="date" href="#"><span class="l10n-lastModified"/></a>
-                    <a class="size" href="#"><span class="l10n-size"/></a>
+        `<div id="view" role="main" aria-label="File listing">
+            <ul id="items" class="clearfix" role="list" aria-label="Files and folders">
+                <li class="header" role="listitem" aria-hidden="true">
+                    <a class="icon" aria-hidden="true"></a>
+                    <a class="label" href="#" role="button" aria-label="Sort by name"><span class="l10n-name"/></a>
+                    <a class="date" href="#" role="button" aria-label="Sort by date"><span class="l10n-lastModified"/></a>
+                    <a class="size" href="#" role="button" aria-label="Sort by size"><span class="l10n-size"/></a>
                 </li>
             </ul>
-            <div id="view-hint"></div>
+            <div id="view-hint" role="status" aria-live="polite"></div>
         </div>`;
 const itemTpl =
-        `<li class="item">
-            <a>
-                <span class="icon square"><img/></span>
-                <span class="icon landscape"><img/></span>
+        `<li class="item" role="listitem" tabindex="0">
+            <a aria-label="">
+                <span class="icon square"><img alt=""/></span>
+                <span class="icon landscape"><img alt=""/></span>
                 <span class="label"></span>
                 <span class="date"></span>
                 <span class="size"></span>

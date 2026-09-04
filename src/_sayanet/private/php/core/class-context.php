@@ -3,6 +3,8 @@
 class Context {
     private static $DEFAULT_PASSHASH = 'cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e';
     private static $AS_ADMIN_SESSION_KEY = 'AS_ADMIN';
+    private static $USER_SESSION_KEY = 'USER';
+    private static $ROLE_SESSION_KEY = 'ROLE';
     private static $L10N_ISO_CODES = array(
         'af', 'bg', 'cs', 'da', 'de', 'el', 'en', 'es', 'et', 'fi', 'fr', 'he',
         'hi', 'hr', 'hu', 'id', 'it', 'ja','ko', 'lv', 'nb', 'nl', 'pl',
@@ -15,6 +17,7 @@ class Context {
     private $setup;
     private $options;
     private $passhash;
+    private $users;
 
     public function __construct($session, $request, $setup) {
         $this->session = $session;
@@ -25,7 +28,32 @@ class Context {
 
         $this->passhash = $this->query_option('passhash', '');
         $this->options['hasCustomPasshash'] = strcasecmp($this->passhash, Context::$DEFAULT_PASSHASH) !== 0;
+        // multi-user: users array takes precedence, keep legacy passhash for compat
+        $this->users = $this->query_option('users', []);
+        if (!is_array($this->users)) {
+            $this->users = [];
+        }
+        // normalize users: ensure each has username, passhash, role
+        $normalized = [];
+        foreach ($this->users as $u) {
+            if (!is_array($u) || empty($u['username']) || empty($u['passhash'])) {
+                continue;
+            }
+            $role = strtolower($u['role'] ?? 'viewer');
+            if (!in_array($role, ['admin', 'editor', 'viewer'], true)) {
+                $role = 'viewer';
+            }
+            $normalized[] = [
+                'username' => (string)$u['username'],
+                'passhash' => (string)$u['passhash'],
+                'role' => $role
+            ];
+        }
+        $this->users = $normalized;
+        $this->options['hasUsers'] = !empty($this->users);
+        // don't leak hashes to client
         unset($this->options['passhash']);
+        unset($this->options['users']);
     }
 
     public function get_session() {
@@ -53,36 +81,94 @@ class Context {
     }
 
     public function login_admin($pass) {
-        $isValid = false;
-        $hash = (string)$this->passhash;
-        // Support modern password_hash (argon2id/bcrypt) and legacy sha512
-        if (str_starts_with($hash, '$2y$') || str_starts_with($hash, '$argon2')) {
-            $isValid = password_verify((string)$pass, $hash);
-            // timing-safe rehash check
-            if ($isValid && password_needs_rehash($hash, PASSWORD_DEFAULT)) {
-                // could persist new hash, but keep in-memory for now
-            }
-        } else {
-            // legacy sha512 with timing-safe compare
-            $computed = hash('sha512', (string)$pass);
-            $isValid = hash_equals(strtolower($hash), strtolower($computed));
+        // backwards compat: single pass without username uses legacy passhash or first admin user
+        $user = $this->request->query('user', null);
+        if ($user !== null && $user !== '') {
+            return $this->login($user, $pass);
         }
+        // legacy path: try users array first if exists, else passhash
+        if (!empty($this->users)) {
+            // try to find admin user that matches pass (for legacy clients sending only pass)
+            foreach ($this->users as $u) {
+                if ($this->verify_hash((string)$pass, $u['passhash'])) {
+                    return $this->set_logged_in($u['username'], $u['role']);
+                }
+            }
+            return $this->set_logged_in(null, null, false);
+        }
+        $isValid = $this->verify_hash((string)$pass, (string)$this->passhash);
         if ($isValid) {
-            // prevent session fixation
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_regenerate_id(true);
             }
         }
         $this->session->set(Context::$AS_ADMIN_SESSION_KEY, $isValid);
+        $this->session->set(Context::$USER_SESSION_KEY, $isValid ? 'admin' : null);
+        $this->session->set(Context::$ROLE_SESSION_KEY, $isValid ? 'admin' : null);
         return $this->session->get(Context::$AS_ADMIN_SESSION_KEY);
+    }
+
+    public function login($user, $pass) {
+        $user = trim((string)$user);
+        $pass = (string)$pass;
+        if ($user === '' || $pass === '') {
+            return $this->set_logged_in(null, null, false);
+        }
+        // check users array
+        if (!empty($this->users)) {
+            foreach ($this->users as $u) {
+                if (strcasecmp($u['username'], $user) === 0 && $this->verify_hash($pass, $u['passhash'])) {
+                    return $this->set_logged_in($u['username'], $u['role']);
+                }
+            }
+            return $this->set_logged_in(null, null, false);
+        }
+        // fallback to legacy passhash: username must be admin or empty
+        if (strcasecmp($user, 'admin') === 0 || $user === '') {
+            $isValid = $this->verify_hash($pass, (string)$this->passhash);
+            if ($isValid) {
+                return $this->set_logged_in('admin', 'admin');
+            }
+        }
+        return $this->set_logged_in(null, null, false);
+    }
+
+    private function verify_hash($pass, $hash) {
+        $hash = (string)$hash;
+        if ($hash === '') {
+            return false;
+        }
+        if (str_starts_with($hash, '$2y$') || str_starts_with($hash, '$argon2')) {
+            return password_verify((string)$pass, $hash);
+        }
+        $computed = hash('sha512', (string)$pass);
+        return hash_equals(strtolower($hash), strtolower($computed));
+    }
+
+    private function set_logged_in($username, $role, $isValid = true) {
+        if ($isValid) {
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_regenerate_id(true);
+            }
+            $this->session->set(Context::$AS_ADMIN_SESSION_KEY, $role === 'admin');
+            $this->session->set(Context::$USER_SESSION_KEY, $username);
+            $this->session->set(Context::$ROLE_SESSION_KEY, $role);
+            return true;
+        }
+        $this->session->set(Context::$AS_ADMIN_SESSION_KEY, false);
+        $this->session->set(Context::$USER_SESSION_KEY, null);
+        $this->session->set(Context::$ROLE_SESSION_KEY, null);
+        return false;
     }
 
     public function logout_admin() {
         $this->session->set(Context::$AS_ADMIN_SESSION_KEY, false);
+        $this->session->set(Context::$USER_SESSION_KEY, null);
+        $this->session->set(Context::$ROLE_SESSION_KEY, null);
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_regenerate_id(true);
         }
-        return $this->session->get(Context::$AS_ADMIN_SESSION_KEY);
+        return false;
     }
 
     /**
@@ -94,7 +180,133 @@ class Context {
     }
 
     public function is_admin() {
-        return $this->session->get(Context::$AS_ADMIN_SESSION_KEY);
+        return $this->session->get(Context::$AS_ADMIN_SESSION_KEY, false) === true;
+    }
+
+    public function get_current_user() {
+        return $this->session->get(Context::$USER_SESSION_KEY, null);
+    }
+
+    public function get_current_role() {
+        return $this->session->get(Context::$ROLE_SESSION_KEY, null) ?? 'viewer';
+    }
+
+    public function can_write() {
+        $role = $this->get_current_role();
+        if ($this->is_admin()) {
+            return true;
+        }
+        return in_array($role, ['admin', 'editor'], true);
+    }
+
+    public function can_admin() {
+        return $this->is_admin();
+    }
+
+    public function get_users_sanitized() {
+        $out = [];
+        foreach ($this->users as $u) {
+            $out[] = ['username' => $u['username'], 'role' => $u['role']];
+        }
+        return $out;
+    }
+
+    public function create_user($username, $pass, $role = 'viewer') {
+        if (!$this->is_admin()) {
+            return false;
+        }
+        $username = trim((string)$username);
+        if ($username === '' || !preg_match('/^[a-zA-Z0-9._-]{3,20}$/', $username)) {
+            return false;
+        }
+        $role = strtolower($role);
+        if (!in_array($role, ['admin', 'editor', 'viewer'], true)) {
+            $role = 'viewer';
+        }
+        foreach ($this->users as $u) {
+            if (strcasecmp($u['username'], $username) === 0) {
+                return false;
+            }
+        }
+        $hash = self::hash_password($pass);
+        $this->users[] = ['username' => $username, 'passhash' => $hash, 'role' => $role];
+        return $this->persist_users();
+    }
+
+    public function delete_user($username) {
+        if (!$this->is_admin()) {
+            return false;
+        }
+        $username = trim((string)$username);
+        $found = false;
+        $new = [];
+        foreach ($this->users as $u) {
+            if (strcasecmp($u['username'], $username) === 0) {
+                $found = true;
+                continue;
+            }
+            $new[] = $u;
+        }
+        if (!$found) {
+            return false;
+        }
+        // prevent deleting last admin
+        $hasAdmin = false;
+        foreach ($new as $u) {
+            if ($u['role'] === 'admin') {
+                $hasAdmin = true;
+                break;
+            }
+        }
+        if (!$hasAdmin && !empty($new)) {
+            // ensure at least one admin remains, if original had admin
+            $origHasAdmin = false;
+            foreach ($this->users as $u) {
+                if ($u['role'] === 'admin') {
+                    $origHasAdmin = true;
+                    break;
+                }
+            }
+            if ($origHasAdmin) {
+                return false;
+            }
+        }
+        $this->users = $new;
+        return $this->persist_users();
+    }
+
+    public function update_user($username, $pass = null, $role = null) {
+        if (!$this->is_admin()) {
+            return false;
+        }
+        $username = trim((string)$username);
+        foreach ($this->users as &$u) {
+            if (strcasecmp($u['username'], $username) === 0) {
+                if ($pass !== null && $pass !== '') {
+                    $u['passhash'] = self::hash_password($pass);
+                }
+                if ($role !== null) {
+                    $role = strtolower($role);
+                    if (in_array($role, ['admin', 'editor', 'viewer'], true)) {
+                        $u['role'] = $role;
+                    }
+                }
+                return $this->persist_users();
+            }
+        }
+        return false;
+    }
+
+    private function persist_users() {
+        $path = $this->setup->get('CONF_PATH') . '/options.json';
+        $data = Json::load($path);
+        $data['users'] = $this->users;
+        // keep legacy passhash for compat but don't overwrite if users exist
+        $ok = Json::save($path, $data);
+        if ($ok) {
+            $this->options['hasUsers'] = !empty($this->users);
+        }
+        return $ok;
     }
 
     public function is_api_request() {

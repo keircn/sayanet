@@ -14,6 +14,7 @@ const testTpl =
         </li>`;
 const loginTpl =
         `<div id="login-wrapper">
+            <input id="user" type="text" placeholder="username" style="display:none"/>
             <input id="pass" type="password" placeholder="password"/>
             <span id="login">login</span>
             <span id="logout">logout</span>
@@ -21,6 +22,7 @@ const loginTpl =
                 The preset password is the empty string, just click login.
                 Change it in '_sayanet/private/conf/options.json' (legacy: '_h5ai/private/conf/options.json').
             </div>
+            <div id="current-user" style="display:none"></div>
         </div>`;
 const supportTpl =
         `<div id="support">
@@ -138,10 +140,20 @@ const reload = () => {
 };
 
 const onLogin = () => {
-    server.request({
-        action: 'login',
-        pass: dom('#pass').val()
-    }).then(reload);
+    const user = dom('#user').val() || '';
+    const pass = dom('#pass').val() || '';
+    const data = {action: 'login', pass};
+    // only send user if hasUsers or user field visible
+    if (config.options.hasUsers || user) {
+        data.user = user;
+    }
+    server.request(data).then(res => {
+        if (res && res.ok === false) {
+            dom('#hint').text('Login failed').show();
+            return;
+        }
+        reload();
+    });
 };
 
 const onLogout = () => {
@@ -163,8 +175,25 @@ const addSupport = () => {
 const addLogin = () => {
     dom(loginTpl).appTo('#content');
 
+    // handle multi-user: show username field if hasUsers
+    const hasUsers = config.options.hasUsers;
+    if (hasUsers) {
+        dom('#user').show();
+        if (!setup.AS_ADMIN) {
+            dom('#user').on('keydown', onKeydown);
+        }
+    }
+
+    // show current user if logged in
+    if (setup.USER) {
+        dom('#current-user').text(`Logged in as ${setup.USER} (${setup.ROLE || 'viewer'})`).show();
+    } else if (setup.AS_ADMIN) {
+        dom('#current-user').text('Logged in as admin').show();
+    }
+
     if (setup.AS_ADMIN) {
         dom('#pass').rm();
+        dom('#user').rm();
         dom('#login').rm();
         dom('#logout').on('click', onLogout);
     } else {
@@ -172,8 +201,11 @@ const addLogin = () => {
         dom('#login').on('click', onLogin);
         dom('#logout').rm();
     }
-    if (config.options.hasCustomPasshash) {
+    if (config.options.hasCustomPasshash && !hasUsers) {
         dom('#hint').rm();
+    }
+    if (hasUsers) {
+        dom('#hint').text('Enter username and password. Ask admin to create account via options.json or admin panel.');
     }
 };
 

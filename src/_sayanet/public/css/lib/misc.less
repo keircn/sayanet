@@ -12,6 +12,17 @@
 *:focus {
     outline: none;
 }
+*:focus-visible {
+    outline: 2px solid var(--ox-blue);
+    outline-offset: 2px;
+}
+button:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible,
+.tool:focus-visible {
+    outline: 2px solid var(--ox-blue);
+    outline-offset: 2px;
+}
 
 code, pre {
     font-family: @font-family-mono;

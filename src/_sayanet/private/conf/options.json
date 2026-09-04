@@ -394,5 +394,11 @@
         "maxSubfolders": 50,
         "naturalSort": true,
         "ignorecase": true
-    }
+    },
+
+    "fileops": {
+        "enabled": false
+    },
+
+    "users": []
 }

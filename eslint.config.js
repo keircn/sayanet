@@ -222,5 +222,11 @@ module.exports = [
         rules: {
             'no-mixed-requires': 0
         }
+    },
+    {
+        files: ['src/_sayanet/public/js/lib/ext/users.js'],
+        rules: {
+            'no-use-before-define': 0
+        }
     }
 ];

@@ -25,6 +25,65 @@
   --ox-pink: #ff7eb6;
   --ox-teal: #3ddbd9;
   --ox-muted: #525252;
+
+  color-scheme: dark;
+}
+
+/* Light theme - respects system preference and manual toggle */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f4f4f4;
+    --bg-elevated: #ffffff;
+    --bg-surface: #e0e0e0;
+
+    --primary: #161616;
+    --primary-light: #000000;
+    --primary-glow: #000000;
+
+    --text: #161616;
+    --text-muted: #525252;
+
+    --accent: #e0e0e0;
+    --accent-bright: #d02670;
+
+    --border: #c6c6c6;
+    --filter-bg: none;
+
+    --ox-blue: #0f62fe;
+    --ox-cyan: #007d79;
+    --ox-green: #24a148;
+    --ox-magenta: #d02670;
+    --ox-pink: #9f1853;
+
+    color-scheme: light;
+  }
+}
+
+[data-theme="light"] {
+  --bg: #f4f4f4;
+  --bg-elevated: #ffffff;
+  --bg-surface: #e0e0e0;
+  --primary: #161616;
+  --text: #161616;
+  --text-muted: #525252;
+  --accent: #e0e0e0;
+  --accent-bright: #d02670;
+  --border: #c6c6c6;
+  --ox-blue: #0f62fe;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #161616;
+  --bg-elevated: #262626;
+  --bg-surface: #393939;
+  --text: #f2f4f8;
+  --text-muted: #a8a8a8;
+  --accent: #525252;
+  --accent-bright: #ee5396;
+  --border: #525252;
+  --ox-blue: #78a9ff;
+  color-scheme: dark;
 }
 
 @col-red-500: var(--accent-bright);
@@ -83,6 +142,10 @@
   height: 240px;
   background: url('/_sayanet/public/images/saya.png') no-repeat center/contain;
   pointer-events: none;
-  opacity: 0.8;
-  z-index: 9999;
+  opacity: 0.15;
+  z-index: 1;
 }
+@media (prefers-reduced-transparency: reduce) {
+  #root::after { opacity: 0.05; }
+}
+#root[data-watermark="hidden"]::after { display: none; }

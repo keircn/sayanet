@@ -158,7 +158,7 @@ class Setup {
         }
     }
 
-    public function to_jsono($as_admin = false) {
+    public function to_jsono($as_admin = false, $user = null, $role = null) {
         $keys = [
             'PUBLIC_HREF',
             'ROOT_HREF'
@@ -193,7 +193,7 @@ class Setup {
             ]);
         }
 
-        $jsono = ['AS_ADMIN' => $as_admin];
+        $jsono = ['AS_ADMIN' => $as_admin, 'USER' => $user, 'ROLE' => $role, 'CAN_WRITE' => in_array($role, ['admin', 'editor'], true) || $as_admin];
         foreach ($keys as $key) {
             $jsono[$key] = $this->get($key);
         }

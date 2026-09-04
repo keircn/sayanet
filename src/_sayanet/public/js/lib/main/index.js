@@ -1,5 +1,8 @@
 require('../view/viewmode');
 
+require('../ext/fileops');
+require('../ext/users');
+require('../ext/theme');
 require('../ext/autorefresh');
 require('../ext/contextmenu');
 require('../ext/crumb');

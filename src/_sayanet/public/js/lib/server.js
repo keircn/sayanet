@@ -9,17 +9,29 @@ const request = async (data, {signal} = {}) => {
             signal
         });
         const text = await res.text();
+        let json;
         try {
-            return JSON.parse(text);
+            json = JSON.parse(text);
         } catch (err) {
-            return {err, txt: text};
+            return {err, txt: text, status: res.status};
         }
+        if (res.status === 429) {
+            const retry = res.headers.get('Retry-After') || '30';
+            // show notification if available
+            try {
+                const event = require('../core/event');
+                event.pub('notification', `Rate limited, retry after ${retry}s`);
+            } catch (e) { /* ignore missing event */ }
+            json.retryAfter = retry;
+            json.status = 429;
+        }
+        json.status = json.status || res.status;
+        return json;
     } catch (err) {
-        // network error or abort
         if (err && err.name === 'AbortError') {
-            return {err, txt: ''};
+            return {err, txt: '', status: 0};
         }
-        return {err, txt: String(err)};
+        return {err, txt: String(err), status: 0};
     }
 };
 

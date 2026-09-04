@@ -172,5 +172,18 @@
         "maxSubfolders": 50,
         "naturalSort": true,
         "ignorecase": true
-    }
+    },
+
+    /* file operations - requires can_write (editor/admin). Rate-limited generously for public. */
+    "fileops": {
+        "enabled": true
+    },
+
+    /* multi-user - add users with: php -r "echo password_hash('pass', PASSWORD_DEFAULT);"
+       role: admin (full), editor (write), viewer (read-only). Legacy passhash still works if users empty. */
+    "users": [
+        // {"username": "admin", "passhash": "$2y$10$...", "role": "admin"},
+        // {"username": "alice", "passhash": "$2y$10$...", "role": "editor"},
+        // {"username": "bob", "passhash": "$2y$10$...", "role": "viewer"}
+    ]
 }
