@@ -21,10 +21,17 @@
         position: relative;
         white-space: nowrap;
         background: @col-back-paper;
+        border-radius: 6px;
+        transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 
         &:hover {
             color: @col-text-hover;
             background: @col-back-panel;
+            box-shadow: var(--shadow-sm);
+        }
+        &.selected {
+            outline: 1.5px solid var(--ox-blue);
+            outline-offset: -1.5px;
         }
     }
 

@@ -3,33 +3,46 @@
     overflow: hidden;
     flex: 0 0 auto;
     order: 1;
+    align-items: center;
 
-    background: @col-back-panel;
-    border-bottom: 1px solid @col-border;
-    z-index: 1;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    z-index: 2;
+    backdrop-filter: saturate(1.2);
 }
 
 #toolbar {
     overflow: hidden;
     flex: 0 0 auto;
     order: 1;
-    height: 48px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
 
     .tool {
         .eased-transition;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        border-radius: 8px;
+        padding: 4px;
 
         img {
             display: inline-block;
-            width: 24px;
-            height: 24px;
-            padding: 12px;
+            width: 22px;
+            height: 22px;
+            padding: 8px;
+            border-radius: 8px;
         }
 
         &:hover {
-            background: @col-back-hover;
+            background: var(--bg-surface);
         }
+        &:active { transform: scale(0.97); }
     }
 }
 

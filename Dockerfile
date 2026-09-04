@@ -5,7 +5,8 @@ RUN corepack enable && corepack prepare pnpm@10 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm run build
+RUN pnpm run build && pnpm run build:vite
+RUN mkdir -p /app/build/_sayanet/public/cache /app/build/_sayanet/private/cache && chmod -R 777 /app/build/_sayanet/public/cache /app/build/_sayanet/private/cache
 
 FROM php:8.3-apache
 LABEL maintainer="keircn/sayanet"

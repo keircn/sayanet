@@ -69,11 +69,11 @@
         "hideFolders": false,
         "hideIf403": true,
         "hideParentFolder": false,
-        "maxIconSize": 40,
-        "modes": ["details", "grid", "icons"],
-        "modeToggle": false,
+        "maxIconSize": 96,
+        "modes": ["grid", "details", "icons"],
+        "modeToggle": "next",
         "setParentFolderLabels": true,
-        "sizes": [20, 40, 60, 80, 100, 140, 180, 220, 260, 300],
+        "sizes": [40, 60, 80, 100, 140, 180, 220, 260, 300],
         "theme": "comity",
         "unmanaged": ["index.html", "index.htm", "index.php"],
         "unmanagedInNewWindow": false
@@ -149,7 +149,7 @@
     - ignorecase: boolean, ignore case
     */
     "filter": {
-        "enabled": false,
+        "enabled": true,
         "advanced": true,
         "debounceTime": 100,
         "ignorecase": true
@@ -311,7 +311,7 @@
     - ignorecase: boolean, ignore case
     */
     "search": {
-        "enabled": false,
+        "enabled": true,
         "advanced": true,
         "debounceTime": 300,
         "ignorecase": true
@@ -363,10 +363,10 @@
     */
     "thumbnails": {
         "enabled": true,
-        "img": ["img-bmp", "img-gif", "img-ico", "img-jpg", "img-png"],
+        "img": ["img", "img-bmp", "img-gif", "img-ico", "img-jpg", "img-png", "img-raw", "img-svg", "img-tiff"],
         "mov": ["vid-avi", "vid-flv", "vid-mkv", "vid-mov", "vid-mp4", "vid-mpg", "vid-webm"],
         "doc": ["x-pdf", "x-ps"],
-        "delay": 1,
+        "delay": 200,
         "size": 240,
         "exif": false,
         "chunksize": 20
@@ -397,7 +397,7 @@
     },
 
     "fileops": {
-        "enabled": false
+        "enabled": true
     },
 
     "users": []

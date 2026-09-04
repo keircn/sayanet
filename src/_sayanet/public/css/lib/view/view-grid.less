@@ -20,19 +20,24 @@
     margin: 28px;
 
     .item {
-        .rounded;
+        border-radius: 10px;
         overflow: hidden;
         float: left;
         margin: 8px;
+        border: 1px solid var(--border-subtle);
+        box-shadow: var(--shadow-sm);
 
         &:hover {
-            .raised;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
         }
     }
 
     .square {
         display: inline-block;
         vertical-align: top;
+        img { border-radius: 6px; }
+        .thumb { object-fit: cover; border-radius: 6px; }
     }
 
     .label {

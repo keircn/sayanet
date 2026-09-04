@@ -33,12 +33,19 @@ const init = () => {
     // add toggle to toolbar if enabled
     const $toolbar = dom('#toolbar');
     if ($toolbar.length) {
-        const $btn = dom('<div id="theme-toggle" class="tool" title="Toggle theme"><span>◐</span></div>');
+        const labelFor = t => t === 'dark' ? 'Dark' : t === 'light' ? 'Light' : 'Auto';
+        const iconFor = t => t === 'dark' ? '🌙' : t === 'light' ? '☀️' : '◐';
+        const $btn = dom(`<div id="theme-toggle" class="tool" title="Toggle theme (current: ${labelFor(current())})"><span>${iconFor(current())}</span></div>`);
+        const refreshIcon = () => {
+            const c = current();
+            $btn.find('span').text(iconFor(c));
+            $btn.attr('title', `Theme: ${labelFor(c)} (click to cycle)`);
+        };
         $btn.on('click', () => {
             const cur = current();
             const next = cur === 'dark' ? 'light' : cur === 'light' ? 'system' : 'dark';
             apply(next);
-            // also toggle watermark on light for less distraction?
+            refreshIcon();
         }).appTo($toolbar);
     }
 

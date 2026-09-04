@@ -15,8 +15,9 @@
   --accent: #525252;
   --accent-bright: #ee5396;
 
-  --border: #525252;
-  --filter-bg: grayscale(1);
+  --border: #2e2e2e;
+  --border-subtle: #262626;
+  --filter-bg: none;
 
   --ox-blue: #78a9ff;
   --ox-cyan: #82cfff;
@@ -25,6 +26,10 @@
   --ox-pink: #ff7eb6;
   --ox-teal: #3ddbd9;
   --ox-muted: #525252;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --radius: 8px;
 
   color-scheme: dark;
 }
@@ -121,6 +126,7 @@
 @col-text-hover: var(--ox-blue);
 @col-back-hover: var(--bg-surface);
 @col-border: var(--border);
+@col-border-subtle: var(--border-subtle);
 @col-border-strong: var(--accent);
 @col-border-stronger: var(--text-muted);
 
@@ -136,16 +142,17 @@
 #root::after {
   content: "";
   position: fixed;
-  bottom: 0px;
-  right: 0px;
-  width: 150px;
-  height: 240px;
+  bottom: 12px;
+  right: 12px;
+  width: 120px;
+  height: 190px;
   background: url('/_sayanet/public/images/saya.png') no-repeat center/contain;
   pointer-events: none;
-  opacity: 0.15;
+  opacity: 0.06;
   z-index: 1;
+  filter: saturate(0.9);
 }
 @media (prefers-reduced-transparency: reduce) {
-  #root::after { opacity: 0.05; }
+  #root::after { opacity: 0.03; }
 }
 #root[data-watermark="hidden"]::after { display: none; }

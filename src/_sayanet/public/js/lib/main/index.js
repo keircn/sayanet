@@ -2,6 +2,7 @@ require('../view/viewmode');
 
 require('../ext/fileops');
 require('../ext/users');
+require('../ext/auth');
 require('../ext/theme');
 require('../ext/autorefresh');
 require('../ext/contextmenu');

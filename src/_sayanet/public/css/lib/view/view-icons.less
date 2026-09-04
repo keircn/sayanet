@@ -24,19 +24,24 @@
     margin: 28px;
 
     .item {
-        .rounded;
+        border-radius: 10px;
         overflow: hidden;
         float: left;
         margin: 8px;
+        border: 1px solid var(--border-subtle);
+        box-shadow: var(--shadow-sm);
 
         &:hover {
-            .raised;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
     }
 
     .landscape {
         display: block;
-        background: @col-back-panel;
+        background: var(--bg-surface);
+        overflow: hidden;
+        img { object-fit: cover; }
     }
 
     .label {

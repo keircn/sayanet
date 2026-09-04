@@ -67,16 +67,19 @@
 
     .item {
         overflow: hidden;
-        border-bottom: 1px solid rgba(0,0,0,0.07);
+        border-bottom: 1px solid var(--border-subtle);
+        border-radius: 0;
 
         &:hover {
-            .raised;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             z-index: 1;
+            background: var(--bg-surface);
         }
 
         &:last-child {
-            border-radius: 0 0 2px 2px;
+            border-radius: 0 0 8px 8px;
         }
+        &:first-of-type { border-radius: 8px 8px 0 0; }
     }
 
     .square {
@@ -86,9 +89,11 @@
         top: -1px;
         padding: 8px;
 
+        img { border-radius: 6px; }
         .thumb {
-            .rounded;
-            box-shadow: 0 0 1px 0 rgba(0,0,0,0.2);
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+            object-fit: cover;
         }
     }
 
