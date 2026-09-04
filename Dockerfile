@@ -27,8 +27,11 @@ COPY --from=builder /app/build/_sayanet /var/www/html/_sayanet
 # ensure _sayanet is readable
 RUN chown -R www-data:www-data /var/www/html/_sayanet && chmod -R 755 /var/www/html/_sayanet
 
-# apache config: allow .htaccess
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+# apache config: allow .htaccess + fallback to sayanet
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf && \
+    echo 'DirectoryIndex index.html index.php /_sayanet/public/index.php' > /var/www/html/.htaccess && \
+    echo 'FallbackResource /_sayanet/public/index.php' >> /var/www/html/.htaccess && \
+    mkdir -p /var/www/html/demo && chown www-data:www-data /var/www/html/.htaccess /var/www/html/demo
 
 # healthcheck
 HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://localhost/_sayanet/public/js/scripts.js || exit 1

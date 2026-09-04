@@ -4,8 +4,8 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./build/_sayanet:/var/www/html/_sayanet:ro
-      - ./demo:/var/www/html/demo:ro
+      - ./build/_sayanet:/var/www/html/_sayanet
+      - ./demo:/var/www/html/demo
     environment:
       - SAYANET_ROOT_PATH=/var/www/html
     healthcheck:
