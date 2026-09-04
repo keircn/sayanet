@@ -11,6 +11,10 @@ const settings = Object.assign({
 let $toolbar;
 let $uploadInput;
 let $folderInput;
+let $progress;
+let $progressFill;
+let $progressLabel;
+let $progressDetail;
 
 const canWrite = () => {
     try {
@@ -21,6 +25,26 @@ const canWrite = () => {
 
 const refresh = () => location.refresh();
 
+const ensureProgress = () => {
+    if ($progress) return;
+    $progress = dom('<div id="upload-progress" class="hidden"><div class="label">Uploading… 0%</div><div class="bar"><div class="fill"></div></div><div class="detail"></div></div>').appTo('body');
+    $progressFill = $progress.find('.fill');
+    $progressLabel = $progress.find('.label');
+    $progressDetail = $progress.find('.detail');
+};
+
+const showProgress = (pct, detail) => {
+    ensureProgress();
+    $progress.rmCls('hidden');
+    $progressFill.css({width: pct + '%'});
+    $progressLabel.text('Uploading… ' + pct + '%');
+    if (detail !== undefined) $progressDetail.text(detail);
+};
+
+const hideProgress = () => {
+    if ($progress) $progress.addCls('hidden');
+};
+
 const uploadFiles = (files, paths) => {
     if (!files || !files.length) return;
     const loc = location.getItem();
@@ -28,25 +52,54 @@ const uploadFiles = (files, paths) => {
     const fd = new FormData();
     fd.append('action', 'upload');
     fd.append('href', loc.absHref);
+    let totalBytes = 0;
     each(files, (f, idx) => {
         fd.append('files[]', f);
+        totalBytes += f.size || 0;
         const p = paths && paths[idx] ? paths[idx] : (f.webkitRelativePath || f.relativePath || '');
         if (p) fd.append('paths[]', p);
     });
-    // use fetch directly for multipart
-    fetch('?', {method: 'POST', body: fd})
-        .then(r => r.json())
-        .then(res => {
-            if (res && res.ok === false) {
-                const detail = res.results ? res.results.filter(x => !x.ok).map(x => x.name + ': ' + (x.error || 'failed')).join(', ') : (res.txt || 'error');
-                event.pub('notification', `Upload failed: ${detail}`);
-            } else if (res && res.results) {
-                const extracted = res.results.filter(x => x.extracted).length;
-                if (extracted) event.pub('notification', `Extracted ${extracted} archive(s)`);
-            }
-            refresh();
-        })
-        .catch(() => event.pub('notification', 'Upload failed'));
+    const totalMb = (totalBytes / 1024 / 1024).toFixed(1);
+    const fileLabel = files.length === 1 ? files[0].name : files.length + ' files';
+    ensureProgress();
+    showProgress(0, fileLabel + ' • 0 / ' + totalMb + ' MB');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '?');
+    xhr.responseType = 'text';
+    xhr.upload.onprogress = ev => {
+        if (ev.lengthComputable) {
+            const pct = Math.round(ev.loaded / ev.total * 100);
+            const loadedMb = (ev.loaded / 1024 / 1024).toFixed(1);
+            const totalEvMb = (ev.total / 1024 / 1024).toFixed(1);
+            showProgress(pct, fileLabel + ' • ' + loadedMb + ' / ' + totalEvMb + ' MB');
+        }
+    };
+    xhr.onload = () => {
+        hideProgress();
+        let res = null;
+        try { res = JSON.parse(xhr.responseText); } catch (e) { res = {ok: false, txt: xhr.responseText}; }
+        if (xhr.status === 413) {
+            event.pub('notification', 'Upload failed: 413 too large – increase client_max_body_size / php post_max_size');
+        } else if (xhr.status === 429) {
+            event.pub('notification', 'Upload rate limited, retry later');
+        } else if (res && res.ok === false) {
+            const detail = res.results ? res.results.filter(x => !x.ok).map(x => x.name + ': ' + (x.error || x.extractError || 'failed')).join(', ') : (res.txt || res.error || 'error');
+            event.pub('notification', 'Upload failed: ' + detail);
+        } else if (res && res.results) {
+            const extracted = res.results.filter(x => x.extracted).length;
+            if (extracted) event.pub('notification', 'Extracted ' + extracted + ' archive(s)');
+            else event.pub('notification', 'Uploaded ' + res.results.length + ' file(s)');
+        }
+        refresh();
+    };
+    xhr.onerror = () => {
+        hideProgress();
+        event.pub('notification', 'Upload failed: network error');
+        refresh();
+    };
+    xhr.onabort = () => hideProgress();
+    xhr.send(fd);
 };
 
 const getFilesFromEntries = async items => {
