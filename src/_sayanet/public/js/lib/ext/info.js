@@ -106,17 +106,23 @@ const update = async item => {
     }
 
     if (settings.qrcode) {
-        const loc = global.window.location;
-        const kjua = await getKjua();
-        $qrcode.clr().app(kjua({
-            render: 'image',
-            size: 200,
-            fill: settings.qrFill,
-            back: settings.qrBack,
-            text: loc.protocol + '//' + loc.host + item.absHref,
-            crisp: true,
-            quiet: 1
-        }));
+        try {
+            const loc = global.window.location;
+            const kjua = await getKjua();
+            if (typeof kjua !== 'function') return;
+            const qr = kjua({
+                render: 'image',
+                size: 200,
+                fill: settings.qrFill,
+                back: settings.qrBack,
+                text: loc.protocol + '//' + loc.host + item.absHref,
+                crisp: true,
+                quiet: 1
+            });
+            if (qr) $qrcode.clr().app(qr);
+        } catch (e) {
+            // qr optional, don't break location update
+        }
     }
 };
 
