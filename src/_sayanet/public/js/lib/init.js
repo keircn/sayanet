@@ -19,5 +19,18 @@ if (name === 'index') {
 }
 
 config._update(query)
-    .then(() => awaitReady())
-    .then(() => require(`./main/${name}`));
+    .then(resp => {
+        if (!resp || resp.status === 500 || (resp.err && !resp.setup)) {
+            const msg = resp && resp.txt ? resp.txt.slice(0, 200) : 'setup failed (500)';
+            console.error('sayanet setup failed', resp);
+            const hint = document.getElementById('fallback-hints');
+            if (hint) hint.innerHTML += `<span style="color:#ee5396;margin-left:16px">setup failed: ${msg} – check php logs</span>`;
+            // still try to continue if we have setup
+            if (!resp || !resp.setup) throw new Error('no-setup:' + msg);
+        }
+        return awaitReady();
+    })
+    .then(() => require(`./main/${name}`))
+    .catch(err => {
+        console.error(err);
+    });

@@ -39,7 +39,7 @@ const render = users => {
 };
 
 const refresh = () => {
-    if (!config.setup.AS_ADMIN) return;
+    if (!config.setup || !config.setup.AS_ADMIN) return;
     server.request({action: 'user_list'}).then(res => {
         if (res && res.users) render(res.users);
     });
@@ -53,7 +53,7 @@ const init = () => {
     $panel = dom('<div id="users-panel" class="block" style="display:none"/>').appTo($sidebar);
     event.sub('location.changed', () => {
         // show only if admin
-        if (config.setup.AS_ADMIN) {
+        if (config.setup && config.setup.AS_ADMIN) {
             $panel.show();
             refresh();
         } else {
@@ -61,7 +61,7 @@ const init = () => {
         }
     });
     // initial check
-    if (config.setup.AS_ADMIN) {
+    if (config.setup && config.setup.AS_ADMIN) {
         $panel.show();
         refresh();
     }
