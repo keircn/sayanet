@@ -111,11 +111,17 @@ else
 fi
 
 mkdir -p "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache"
-chmod 755 "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache" 2>/dev/null || true
-
-if id www-data >/dev/null 2>&1; then
-  chown -R www-data:www-data "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache" 2>/dev/null || true
-fi
+chmod 777 "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache" 2>/dev/null || chmod 775 "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache" 2>/dev/null || true
+for u in www-data nginx http php-fpm apache www; do
+  if id "$u" >/dev/null 2>&1; then
+    chown -R "$u:$u" "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache" 2>/dev/null || true
+    chmod 775 "$DEST_SAYANET/private/cache" "$DEST_SAYANET/public/cache" 2>/dev/null || true
+    break
+  fi
+done
+if [ -f /usr/share/nginx/html/_sayanet/private/cache/.test_writable ]; then rm -f /usr/share/nginx/html/_sayanet/private/cache/.test_writable; fi
+touch "$DEST_SAYANET/private/cache/.test_writable" 2>/dev/null && rm -f "$DEST_SAYANET/private/cache/.test_writable" || chmod 777 "$DEST_SAYANET/private/cache" 2>/dev/null || true
+touch "$DEST_SAYANET/public/cache/.test_writable" 2>/dev/null && rm -f "$DEST_SAYANET/public/cache/.test_writable" || chmod 777 "$DEST_SAYANET/public/cache" 2>/dev/null || true
 
 echo "Deploy done. Preserved: ${PRESERVE[*]} (+ cache). Review *.new files for upstream changes."
 echo "Tip: compare with: diff -u $DEST_SAYANET/private/conf/options.json $DEST_SAYANET/private/conf/options.json.new"

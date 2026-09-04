@@ -15,7 +15,15 @@ class Json {
 
     public static function save($path, $obj) {
         $json = json_encode($obj);
-        return file_put_contents($path, $json) !== false;
+        $dir = dirname($path);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        $res = @file_put_contents($path, $json, LOCK_EX);
+        if ($res === false) {
+            Logger::log('Json::save failed', ['path' => $path]);
+        }
+        return $res !== false;
     }
 
     private static function decode($json) {

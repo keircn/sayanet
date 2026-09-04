@@ -351,8 +351,12 @@ class Context {
 
         foreach ($this->query_option('view.hidden', []) as $re) {
             $re = Util::wrap_pattern($re);
-            if (preg_match($re, $name)) {
+            $res = @preg_match($re, $name);
+            if ($res === 1) {
                 return true;
+            }
+            if ($res === false) {
+                Logger::log('invalid hidden pattern', ['pattern' => $re]);
             }
         }
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-// cross-platform safe deploy (no overwrite of configs)
 import { cp, mkdir, stat, copyFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -36,10 +35,8 @@ async function copyRecursive(src, dst, preserveSet) {
     const s = join(src, ent.name);
     const d = join(dst, ent.name);
     const rel = d.slice(destSayanet.length + 1).replace(/\\/g, '/');
-    // skip cache entirely
     if (rel === 'private/cache' || rel.startsWith('private/cache/')) continue;
     if (preserveSet.has(rel) && existsSync(d)) {
-      // preserve existing, save new as .new
       try {
         await copyFile(s, d + '.new');
         console.log(`  preserved ${rel} (new as ${rel}.new)`);
@@ -62,8 +59,10 @@ await mkdir(destSayanet, { recursive: true });
 const preserveSet = new Set(PRESERVE);
 await copyRecursive(build, destSayanet, preserveSet);
 
-// ensure cache dirs
+import { chmod } from 'node:fs/promises';
 await mkdir(join(destSayanet, 'private/cache'), { recursive: true });
 await mkdir(join(destSayanet, 'public/cache'), { recursive: true });
+try { await chmod(join(destSayanet, 'private/cache'), 0o777); } catch {}
+try { await chmod(join(destSayanet, 'public/cache'), 0o777); } catch {}
 
 console.log('Deploy done.');
