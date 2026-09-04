@@ -1,5 +1,7 @@
 const marked = require('marked');
 const {each, dom} = require('../util');
+
+const parseMd = marked.parse || marked.marked || marked;
 const server = require('../server');
 const event = require('../core/event');
 const allsettings = require('../core/settings');
@@ -15,7 +17,7 @@ const update = (data, key) => {
     if (data && data[key].content) {
         let content = data[key].content;
         if (data[key].type === 'md') {
-            content = marked(content);
+            content = parseMd(content);
         }
         $el.html(content).show();
     } else {
