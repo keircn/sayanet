@@ -27,6 +27,9 @@
     "build:vite": "vite build",
     "dev": "vite",
     "preview": "vite preview",
+    "deploy": "node ghu deploy",
+    "deploy:safe": "bash scripts/deploy-safe.sh",
+    "deploy:safe:node": "node scripts/deploy-safe.mjs",
     "precommit": "npm run -s lint && npm run -s test"
   },
   "devDependencies": {

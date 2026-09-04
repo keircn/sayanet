@@ -148,6 +148,68 @@ ghu.task('deploy', ['build'], 'deploy to a specified path with :dest=/some/path'
         .then(write(mapper_deploy, {overwrite: true, cluster: true}));
 });
 
+ghu.task('deploy-safe', ['build'], 'deploy without overwriting configs with :dest=/some/path', async runtime => {
+    if (typeof runtime.args.dest !== 'string') {
+        throw new Error('no destination path (e.g. :dest=/some/path)');
+    }
+    const dest = resolve(runtime.args.dest);
+    const destSayanet = dest.endsWith('_sayanet') ? dest : join(dest, '_sayanet');
+    console.log(`safe deploy to ${destSayanet} (preserving configs)`);
+
+    const fs = require('fs');
+    const path = require('path');
+    const preserve = ['private/conf/options.json', 'private/conf/types.json'];
+    const buildRoot = join(BUILD, '_sayanet');
+
+    // helper to ensure dir
+    const ensureDir = p => fs.mkdirSync(p, {recursive: true});
+
+    // copy all except preserved and cache
+    const allFiles = await read(`${BUILD}/_sayanet/**`).then(objs => objs);
+    const toWrite = [];
+    for (const obj of allFiles) {
+        const rel = path.relative(buildRoot, obj.target || obj.source.replace(BUILD, ''));
+        // normalize rel
+        let relPosix = rel.split(path.sep).join('/');
+        // ghu read objects have .source and .target? use .source relative to BUILD
+        // fallback: compute from source
+        if (!relPosix || relPosix === '.' ) {
+            relPosix = path.relative(BUILD, obj.source).replace(/^_sayanet\//, '');
+        }
+        // skip preserved if dest exists
+        if (preserve.includes(relPosix) && fs.existsSync(join(destSayanet, relPosix))) {
+            const newPath = join(destSayanet, relPosix + '.new');
+            ensureDir(path.dirname(newPath));
+            fs.writeFileSync(newPath, obj.content);
+            console.log(`  preserved ${relPosix} (new as ${relPosix}.new)`);
+            continue;
+        }
+        if (relPosix.startsWith('private/cache') || relPosix.startsWith('public/cache')) {
+            // skip cache dirs
+            continue;
+        }
+        toWrite.push(obj);
+    }
+    // use ghu write for remaining
+    // we need to write via mapfn
+    const mapper_deploy = mapfn.p(BUILD, dest);
+    // ghu write expects objects with source/target/content, reuse read + filter
+    // Instead directly write filtered via fs
+    for (const obj of toWrite) {
+        const target = obj.target ? obj.target.replace(BUILD, dest) : join(dest, path.relative(BUILD, obj.source));
+        ensureDir(path.dirname(target));
+        if (obj.content) {
+            fs.writeFileSync(target, obj.content);
+        } else if (fs.existsSync(obj.source) && fs.lstatSync(obj.source).isFile()) {
+            fs.copyFileSync(obj.source, target);
+        }
+    }
+    // ensure cache dirs
+    ensureDir(join(destSayanet, 'private/cache'));
+    ensureDir(join(destSayanet, 'public/cache'));
+    console.log('safe deploy done');
+});
+
 ghu.task('watch', runtime => {
     return watch([SRC, TEST], () => ghu.run(runtime.sequence.filter(x => x !== 'watch'), runtime.args, true));
 });
