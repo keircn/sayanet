@@ -21,6 +21,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd exif \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# php upload limits for folder/zip uploads
+RUN echo "upload_max_filesize=0\npost_max_size=0\nmax_file_uploads=200\nmax_execution_time=300\nmemory_limit=512M" > /usr/local/etc/php/conf.d/sayanet.ini
+
 # copy built app
 COPY --from=builder /app/build/_sayanet /var/www/html/_sayanet
 # also copy any static public files that are not built? (images etc already in build via ghu copy)
