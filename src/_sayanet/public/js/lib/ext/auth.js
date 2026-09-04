@@ -37,18 +37,15 @@ const updateButton = () => {
     if (isAdmin()) {
         const label = config.setup.USER ? config.setup.USER + ' (' + config.setup.ROLE + ')' : 'admin';
         $btn.find('.auth-label').text(label);
-        $btn.find('.auth-icon').text('⎋');
         $btn.attr('title', 'Logout (' + label + ')');
         $btn.addCls('is-logged-in');
     } else if (canWrite()) {
         const label = config.setup.USER || 'editor';
         $btn.find('.auth-label').text(label);
-        $btn.find('.auth-icon').text('⎋');
         $btn.attr('title', 'Logout (' + label + ')');
         $btn.addCls('is-logged-in');
     } else {
         $btn.find('.auth-label').text('Login');
-        $btn.find('.auth-icon').text('🔑');
         $btn.attr('title', 'Login as admin');
         $btn.rmCls('is-logged-in');
     }
@@ -149,7 +146,6 @@ const init = () => {
 
     const btnTpl =
         `<div id="auth-btn" class="tool auth-tool" role="button" tabindex="0" aria-label="Login">
-            <span class="auth-icon" aria-hidden="true">🔑</span>
             <span class="auth-label">Login</span>
         </div>`;
 
@@ -161,14 +157,6 @@ const init = () => {
             onAuthClick();
         }
     });
-
-    // also add info-page link if not admin, to expose /_sayanet/public/ without guessing
-    const $flow = dom('#flowbar');
-    if ($flow.length) {
-        const infoHref = config.setup.PUBLIC_HREF || '/_sayanet/public/';
-        const $infoLink = dom(`<a id="auth-info-link" href="${infoHref}" title="Info / admin page" style="margin-left:8px;font-size:0.9em;opacity:0.7">info</a>`);
-        $infoLink.appTo($flow);
-    }
 
     updateButton();
     event.sub('location.changed', updateButton);
