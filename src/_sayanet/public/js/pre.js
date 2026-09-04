@@ -1,5 +1,8 @@
 /* eslint-disable func-names,no-var */
 (function (win) {
+    if (!win) {
+        win = typeof window !== 'undefined' ? window : typeof globalThis !== 'undefined' ? globalThis : null;
+    }
     if (!win || win.window !== win || !win.document) {
         throw new Error('no-window');
     }
