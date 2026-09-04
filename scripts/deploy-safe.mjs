@@ -25,7 +25,7 @@ async function ensureBuild() {
 const PRESERVE = [
   'private/conf/options.json',
   'private/conf/types.json',
-  'private/conf/options.ideal.json'
+  'private/conf/options.example.json'
 ];
 
 async function copyRecursive(src, dst, preserveSet) {
