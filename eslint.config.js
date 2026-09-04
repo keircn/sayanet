@@ -175,7 +175,7 @@ const baseRules = {
 
 module.exports = [
     {
-        ignores: ['build/**', '**/build/**', 'build', 'local/**', 'node_modules/**', 'coverage/**', '.nyc_output/**', 'eslint.config.js', 'pnpm-lock.yaml', '**/*__TMP*', '**/1.__TMP*']
+        ignores: ['build/**', '**/build/**', 'build', 'local/**', 'node_modules/**', 'coverage/**', '.nyc_output/**', 'eslint.config.js', 'pnpm-lock.yaml', '**/*__TMP*', '**/1.__TMP*', 'scripts/**']
     },
     {
         languageOptions: {

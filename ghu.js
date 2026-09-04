@@ -173,7 +173,7 @@ ghu.task('deploy-safe', ['build'], 'deploy without overwriting configs with :des
         let relPosix = rel.split(path.sep).join('/');
         // ghu read objects have .source and .target? use .source relative to BUILD
         // fallback: compute from source
-        if (!relPosix || relPosix === '.' ) {
+        if (!relPosix || relPosix === '.') {
             relPosix = path.relative(BUILD, obj.source).replace(/^_sayanet\//, '');
         }
         // skip preserved if dest exists
